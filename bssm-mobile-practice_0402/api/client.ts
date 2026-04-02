@@ -3,7 +3,7 @@ import { Platform } from 'react-native';
 
 // 실기기: 개발 장비의 실제 IP 사용
 const BASE_URL = Platform.select({
-    android: 'http://10.0.2.2:3000',
+    // android: 'http://10.0.2.2:3000',
     default: 'https://bssm-api.zer0base.me',
 });
 
