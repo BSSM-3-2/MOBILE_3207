@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { View, ActivityIndicator } from 'react-native';
 import NavigationTop from '@components/navigation/NavigationTop';
 import ContentContainer from '@components/container';
@@ -7,9 +8,12 @@ import { ThemedView } from '@components/themed-view';
 import { useFeedStore } from '@/store/feed-store';
 
 export default function HomeScreen() {
-    const { posts, loading, fetchFeed: _fetchFeed, loadMore } = useFeedStore();
+    const { posts, loading, fetchFeed, loadMore } = useFeedStore();
 
     // TODO: (4.5차) 화면이 처음 마운트될 때 fetchFeed()를 호출한다
+    useEffect(() => {
+        fetchFeed();
+    }, []);
 
     return (
         <ThemedView style={{ flex: 1 }}>
