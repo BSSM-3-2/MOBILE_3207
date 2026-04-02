@@ -20,6 +20,7 @@ const apiClient = axios.create({
 apiClient.interceptors.request.use(
     config => {
         // TODO: (2차) config 객체에서 method와 url을 꺼내 콘솔에 출력한다
+        console.log(config.method?.toUpperCase(), config.url);
 
         // TODO: 인증 토큰이 생기면 여기서 주입
         // const token = getToken();
