@@ -38,6 +38,13 @@ apiClient.interceptors.response.use(
         const status = error.response?.status;
 
         // TODO: (2.5차) status 값에 따라 404 / 401 / 그 외를 구분해 콘솔에 출력한다
+        if (status === 404) {
+            console.warn('404 Not Found:', error.config?.url);
+        } else if (status === 401) {
+            console.warn('401 Unauthorized: 인증이 필요합니다.');
+        } else {
+            console.error('Error:', status, error.message);
+        }
 
         return Promise.reject(error);
     },
