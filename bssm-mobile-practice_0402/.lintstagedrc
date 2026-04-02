@@ -1,0 +1,6 @@
+{
+  "*.{ts,mts,cts,tsx,js,mjs,cjs,jsx,md}": [
+    "yarn lint-fix",
+    "yarn prettier-fix",
+  ]
+}
