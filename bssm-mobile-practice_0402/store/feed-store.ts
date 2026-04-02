@@ -24,8 +24,18 @@ export const useFeedStore = create<FeedState>((set, get) => ({
     error: null,
 
     fetchFeed: async () => {
-        // TODO: (4차) set()으로 loading을 켜고, getFeed(1)를 호출해 posts/pagination을 저장한다
-        // 힌트: try/catch로 감싸고 실패 시 error 메시지도 저장한다
+        set({ loading: true, error: null });
+        try {
+            const { data, pagination } = await getFeed(1);
+            set({
+                posts: data,
+                page: 1,
+                hasNext: pagination.hasNext,
+                loading: false,
+            });
+        } catch (e) {
+            set({ loading: false, error: (e as Error).message });
+        }
     },
 
     loadMore: async () => {
