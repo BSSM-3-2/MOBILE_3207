@@ -22,7 +22,9 @@ function FeedList({
     const { removePost } = useFeedStore();
 
     // TODO: scrollHandler 정의 (실습 6-2)
-    const scrollHandler = useAnimatedScrollHandler(event => {});
+    const scrollHandler = useAnimatedScrollHandler(event => {
+        if (scrollY) scrollY.value = event.contentOffset.y;
+    });
 
     return (
         // TODO: onScroll + scrollEventThrottle 연결 (실습 6-3)
