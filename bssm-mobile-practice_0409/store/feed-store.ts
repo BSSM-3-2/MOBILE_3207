@@ -107,5 +107,9 @@ export const useFeedStore = create<FeedState>((set, get) => ({
     },
 
     // TODO: removePost 구현 (실습 4-5)
-    removePost: (postId: string) => {},
+    removePost: (postId: string) => {
+        set(state => ({
+            posts: state.posts.filter(p => p.id !== postId),
+        }));
+    },
 }));
