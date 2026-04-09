@@ -9,6 +9,7 @@ import Animated, {
     runOnJS,
     clamp,
 } from 'react-native-reanimated';
+import * as Haptics from 'expo-haptics';
 import { Post } from '@type/Post';
 import { FeedPost } from './FeedPost';
 
@@ -46,8 +47,10 @@ function SwipeableFeedPost({
         .minDuration(400)
         .onStart(() => {
             cardScale.value = withTiming(0.95, { duration: 150 });
+            runOnJS(Haptics.impactAsync)(Haptics.ImpactFeedbackStyle.Medium);
         })
         .onFinalize(() => {
+            // onEnd 대신 onFinalize: Race에서 다른 제스처가 이겨도 반드시 실행됨
             cardScale.value = withSpring(1);
         });
 
