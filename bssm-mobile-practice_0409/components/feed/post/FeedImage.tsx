@@ -1,8 +1,8 @@
 import { Image, ImageLoadEventData } from 'expo-image';
 import { Dimensions, ImageSourcePropType, StyleSheet } from 'react-native';
 import { useState } from 'react';
-import { Gesture } from 'react-native-gesture-handler';
-import { useAnimatedStyle } from 'react-native-reanimated';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import Animated, { useAnimatedStyle, useSharedValue, clamp } from 'react-native-reanimated';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const MAX_SCALE = 3;
@@ -17,11 +17,19 @@ export default function FeedImage({
     const [imageHeight, setImageHeight] = useState(SCREEN_WIDTH);
 
     // TODO: scale, savedScale 선언 (실습 2-1)
+    const scale = useSharedValue(1);
+    const savedScale = useSharedValue(1);
 
     // TODO: heartOpacity, heartScale 선언 (실습 3-1)
 
     // TODO: pinchGesture 정의 (실습 2-2)
-    const pinchGesture = Gesture.Pinch();
+    const pinchGesture = Gesture.Pinch()
+        .onUpdate(e => {
+            scale.value = clamp(savedScale.value * e.scale, 1, MAX_SCALE);
+        })
+        .onEnd(() => {
+            savedScale.value = scale.value;
+        });
 
     // TODO: doubleTapGesture 정의 (실습 3-2)
     const doubleTapGesture = Gesture.Tap().numberOfTaps(2);
@@ -33,7 +41,9 @@ export default function FeedImage({
     );
 
     // TODO: imageAnimatedStyle 정의 (실습 2-3)
-    const imageAnimatedStyle = useAnimatedStyle(() => ({}));
+    const imageAnimatedStyle = useAnimatedStyle(() => ({
+        transform: [{ scale: scale.value }],
+    }));
 
     // TODO: heartAnimatedStyle 정의 (실습 3-4)
     const heartAnimatedStyle = useAnimatedStyle(() => ({}));
@@ -47,11 +57,15 @@ export default function FeedImage({
     return (
         // TODO: GestureDetector + Animated.View 감싸기 (실습 2-4)
         // TODO: 하트 오버레이 추가 (실습 3-5)
-        <Image
-            source={image}
-            style={{ width: SCREEN_WIDTH, height: imageHeight }}
-            onLoad={handleImageLoad}
-        />
+        <GestureDetector gesture={composedGesture}>
+            <Animated.View style={imageAnimatedStyle}>
+                <Image
+                    source={image}
+                    style={{ width: SCREEN_WIDTH, height: imageHeight }}
+                    onLoad={handleImageLoad}
+                />
+            </Animated.View>
+        </GestureDetector>
     );
 }
 
