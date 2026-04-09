@@ -2,7 +2,14 @@ import { Image, ImageLoadEventData } from 'expo-image';
 import { Dimensions, ImageSourcePropType, StyleSheet } from 'react-native';
 import { useState } from 'react';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import Animated, { useAnimatedStyle, useSharedValue, clamp } from 'react-native-reanimated';
+import Animated, {
+    useAnimatedStyle,
+    useSharedValue,
+    clamp,
+    withSequence,
+    withTiming,
+    runOnJS,
+} from 'react-native-reanimated';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const MAX_SCALE = 3;
@@ -21,6 +28,8 @@ export default function FeedImage({
     const savedScale = useSharedValue(1);
 
     // TODO: heartOpacity, heartScale 선언 (실습 3-1)
+    const heartOpacity = useSharedValue(0);
+    const heartScale = useSharedValue(0);
 
     // TODO: pinchGesture 정의 (실습 2-2)
     const pinchGesture = Gesture.Pinch()
@@ -32,7 +41,22 @@ export default function FeedImage({
         });
 
     // TODO: doubleTapGesture 정의 (실습 3-2)
-    const doubleTapGesture = Gesture.Tap().numberOfTaps(2);
+    const doubleTapGesture = Gesture.Tap()
+        .numberOfTaps(2)
+        .onStart(() => {
+            // 힌트: onDoubleTap()을 직접 호출하면 "Calling JS functions from the UI thread is not allowed"
+            // runOnJS로 감싸야 JS 스레드에서 안전하게 실행됨
+            if (onDoubleTap) runOnJS(onDoubleTap)();
+
+            heartScale.value = withSequence(
+                withTiming(1.2, { duration: 200 }),
+                withTiming(1, { duration: 100 }),
+            );
+            heartOpacity.value = withSequence(
+                withTiming(1, { duration: 150 }),
+                withTiming(0, { duration: 400 }),
+            );
+        });
 
     // TODO: Gesture.Simultaneous로 합성 (실습 3-3)
     const composedGesture = Gesture.Simultaneous(
@@ -46,7 +70,10 @@ export default function FeedImage({
     }));
 
     // TODO: heartAnimatedStyle 정의 (실습 3-4)
-    const heartAnimatedStyle = useAnimatedStyle(() => ({}));
+    const heartAnimatedStyle = useAnimatedStyle(() => ({
+        opacity: heartOpacity.value,
+        transform: [{ scale: heartScale.value }],
+    }));
 
     const handleImageLoad = (e: ImageLoadEventData) => {
         const { width, height } = e.source;
@@ -64,6 +91,13 @@ export default function FeedImage({
                     style={{ width: SCREEN_WIDTH, height: imageHeight }}
                     onLoad={handleImageLoad}
                 />
+                {/* TODO: 하트 오버레이 추가 (실습 3-5) */}
+                <Animated.View
+                    style={[styles.heartOverlay, heartAnimatedStyle]}
+                    pointerEvents='none'
+                >
+                    <Animated.Text style={{ fontSize: 100 }}>❤️</Animated.Text>
+                </Animated.View>
             </Animated.View>
         </GestureDetector>
     );
