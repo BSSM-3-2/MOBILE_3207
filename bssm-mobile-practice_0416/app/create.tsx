@@ -70,6 +70,23 @@ export default function CreateScreen() {
                 );
                 return;
             }
+            if (Platform.OS === 'ios' && status === 'undetermined') {
+                const userConfirmed = await new Promise<boolean>(resolve => {
+                    Alert.alert(
+                        '사진 라이브러리 접근',
+                        '게시물 작성을 위해 사진 라이브러리에 접근합니다.',
+                        [
+                            {
+                                text: '취소',
+                                onPress: () => resolve(false),
+                                style: 'cancel',
+                            },
+                            { text: '괜찮아요', onPress: () => resolve(true) },
+                        ],
+                    );
+                });
+                if (!userConfirmed) return;
+            }
             const { status: newStatus } =
                 await requestMediaLibraryPermissionsAsync();
             if (newStatus !== 'granted') {
