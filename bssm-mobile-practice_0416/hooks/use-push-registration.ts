@@ -1,6 +1,12 @@
 import { useEffect } from 'react';
 import * as Device from 'expo-device';
+import {
+    getPermissionsAsync,
+    requestPermissionsAsync,
+    getExpoPushTokenAsync,
+} from 'expo-notifications';
 import { useAuthStore } from '@/store/auth-store';
+import { registerPushDevice } from '@/api/push';
 
 /**
  * 로그인된 상태에서 Expo push token을 얻어 서버에 등록합니다.
@@ -23,12 +29,18 @@ async function registerDevice() {
     // setNotificationChannelAsync로 Android 알림 채널을 생성하세요
     // name, importance 등을 지정하고, importance 값을 바꿔가며 heads-up 동작을 비교해보세요
 
-    // TODO 실습 4-1
-    // getPermissionsAsync로 현재 권한 상태를 확인하고
-    // 미허용 시 requestPermissionsAsync로 사용자에게 요청하세요
-    // 최종적으로 granted가 아니면 return 처리하세요
+    const { status: existingStatus } = await getPermissionsAsync();
+    let finalStatus = existingStatus;
+    if (existingStatus !== 'granted') {
+        const { status } = await requestPermissionsAsync();
+        finalStatus = status;
+    }
+    if (finalStatus !== 'granted') {
+        console.log('Notification permission not granted');
+        return;
+    }
 
-    // TODO 실습 4-2
-    // getExpoPushTokenAsync로 Expo Push Token을 발급받고
-    // registerPushDevice(token)으로 서버에 전송하세요
+    const token = (await getExpoPushTokenAsync()).data;
+    console.log('Expo Push Token:', token);
+    await registerPushDevice(token);
 }
