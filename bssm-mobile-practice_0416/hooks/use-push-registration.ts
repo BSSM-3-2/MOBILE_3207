@@ -4,7 +4,10 @@ import {
     getPermissionsAsync,
     requestPermissionsAsync,
     getExpoPushTokenAsync,
+    setNotificationChannelAsync,
+    AndroidImportance,
 } from 'expo-notifications';
+import { Platform } from 'react-native';
 import { useAuthStore } from '@/store/auth-store';
 import { registerPushDevice } from '@/api/push';
 
@@ -25,9 +28,14 @@ async function registerDevice() {
     // 실기기가 아니면 Expo push token을 발급받을 수 없음
     if (!Device.isDevice) return;
 
-    // TODO 실습 8-1
-    // setNotificationChannelAsync로 Android 알림 채널을 생성하세요
-    // name, importance 등을 지정하고, importance 값을 바꿔가며 heads-up 동작을 비교해보세요
+    if (Platform.OS === 'android') {
+        await setNotificationChannelAsync('default', {
+            name: 'default',
+            importance: AndroidImportance.HIGH,
+            vibrationPattern: [0, 250, 250, 250],
+            lightColor: '#FF231F7C',
+        });
+    }
 
     const { status: existingStatus } = await getPermissionsAsync();
     let finalStatus = existingStatus;
