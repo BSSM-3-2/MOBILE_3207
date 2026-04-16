@@ -47,14 +47,40 @@ function AuthGuard() {
     usePushRegistration();
 
     useEffect(() => {
-        // TODO 실습 7-1
-        // addNotificationReceivedListener로 Foreground 수신 이벤트 구독
-        // TODO 실습 7-2
-        // addNotificationResponseReceivedListener로 알림 탭 이벤트 구독
-        // TODO 실습 7-3
-        // getLastNotificationResponseAsync로 Killed 상태 진입 데이터 확인
-        // TODO 실습 7-4 (return)
-        // 리스너 클린업 — sub.remove() 호출
+        const foregroundSub = Notifications.addNotificationReceivedListener(
+            notification => {
+                console.log('Foreground notification received:', notification);
+            },
+        );
+
+        const responseSub =
+            Notifications.addNotificationResponseReceivedListener(response => {
+                console.log('Notification response received:', response);
+                const screen =
+                    response.notification.request.content.data?.screen;
+                if (screen) {
+                    router.push(screen as never);
+                }
+            });
+
+        Notifications.getLastNotificationResponseAsync().then(response => {
+            if (response) {
+                console.log(
+                    'Last notification response (killed state):',
+                    response,
+                );
+                const screen =
+                    response.notification.request.content.data?.screen;
+                if (screen) {
+                    router.push(screen as never);
+                }
+            }
+        });
+
+        return () => {
+            foregroundSub.remove();
+            responseSub.remove();
+        };
     }, []);
 
     useEffect(() => {
