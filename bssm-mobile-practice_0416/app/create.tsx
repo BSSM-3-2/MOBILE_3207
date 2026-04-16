@@ -10,6 +10,7 @@ import {
     ActivityIndicator,
     Alert,
     Platform,
+    Linking,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -53,14 +54,28 @@ export default function CreateScreen() {
 
     // ── 이미지 선택 ──────────────────────────────────────────────
     const handlePickImage = async () => {
-        const { status } = await getMediaLibraryPermissionsAsync();
+        const { status, canAskAgain } = await getMediaLibraryPermissionsAsync();
         if (status !== 'granted') {
+            if (!canAskAgain) {
+                Alert.alert(
+                    '갤러리 접근 권한 필요',
+                    '사진을 선택하려면 설정에서 갤러리 접근 권한을 허용해 주세요.',
+                    [
+                        { text: '취소', style: 'cancel' },
+                        {
+                            text: '설정으로 이동',
+                            onPress: () => Linking.openSettings(),
+                        },
+                    ],
+                );
+                return;
+            }
             const { status: newStatus } =
                 await requestMediaLibraryPermissionsAsync();
             if (newStatus !== 'granted') {
                 Alert.alert(
                     '갤러리 접근 권한 필요',
-                    '사진을 선택하려면 갤러리 접근 권한이 필요합니다. 설정에서 권한을 허용해 주세요.',
+                    '사진을 선택하려면 갤러리 접근 권한이 필요합니다.',
                 );
                 return;
             }
