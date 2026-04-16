@@ -20,6 +20,10 @@ import {
     requestMediaLibraryPermissionsAsync,
     launchImageLibraryAsync,
 } from 'expo-image-picker';
+import {
+    getPermissionsAsync,
+    scheduleNotificationAsync,
+} from 'expo-notifications';
 import { createPost } from '@/api/content';
 import { useFeedStore } from '@/store/feed-store';
 import { Pretendard, FontSizes, Spacing, FeedColors } from '@/constants/theme';
@@ -32,12 +36,19 @@ interface SelectedImage {
 
 // 업로드 성공 후 로컬 알림 예약
 async function scheduleUploadNotification(caption: string) {
-    // TODO 실습 6-1
-    // getPermissionsAsync로 알림 권한을 확인하고 미허용이면 return 하세요
-    // scheduleNotificationAsync로 로컬 알림을 발송하세요
-    // content에 title, body를 구성하고
-    // TODO 실습 6-2
-    // trigger: { seconds: N }으로 N초 딜레이 발송을 테스트해보세요
+    const { status } = await getPermissionsAsync();
+    if (status !== 'granted') return;
+
+    await scheduleNotificationAsync({
+        content: {
+            title: '게시물 업로드 완료',
+            body: caption
+                ? `"${caption.length > 20 ? caption.slice(0, 20) + '…' : caption}" 게시물이 업로드되었습니다.`
+                : '새 게시물이 업로드되었습니다.',
+            data: { screen: 'feed' },
+        },
+        trigger: { seconds: 3 },
+    });
 }
 
 export default function CreateScreen() {
