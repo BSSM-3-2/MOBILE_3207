@@ -23,11 +23,11 @@ import * as Notifications from 'expo-notifications';
 // shouldShowAlert, shouldPlaySound 옵션 값을 채워보세요
 Notifications.setNotificationHandler({
     handleNotification: async () => ({
-        shouldShowAlert: false, // TODO: 배너 표시 여부
-        shouldPlaySound: false, // TODO: 소리 재생 여부
+        shouldShowAlert: true,
+        shouldPlaySound: true,
         shouldSetBadge: false,
-        shouldShowBanner: false,
-        shouldShowList: false,
+        shouldShowBanner: true,
+        shouldShowList: true,
     }),
 });
 
