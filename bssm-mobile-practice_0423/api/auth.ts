@@ -39,5 +39,8 @@ export const refreshToken = async (token: string): Promise<AuthResponse> => {
     return res.data;
 };
 
-// TODO 실습 4-2: POST /auth/logout 을 호출하는 logout 함수를 작성하세요
-// Body: { refreshToken: token }
+export const logout = async (token: string): Promise<void> => {
+    await apiClient.post('/auth/logout', {
+        refreshToken: token,
+    });
+};

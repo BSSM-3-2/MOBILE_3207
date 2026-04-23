@@ -12,6 +12,14 @@ const apiClient = axios.create({
     },
 });
 
+let isRefreshing = false;
+let refreshQueue: ((token: string) => void)[] = [];
+
+const processQueue = (token: string) => {
+    refreshQueue.forEach(callback => callback(token));
+    refreshQueue = [];
+};
+
 // Request Interceptor
 // 모든 요청 전에 실행 — 토큰 주입
 apiClient.interceptors.request.use(
@@ -43,14 +51,32 @@ apiClient.interceptors.response.use(
             const { useAuthStore } = require('@/store/auth-store');
             const store = useAuthStore.getState();
 
-            // TODO 실습 4-3: store.logOut()을 호출하세요
+            const originalRequest = error.config;
 
-            // TODO 실습 5-2: logOut 대신 토큰 갱신을 시도하고 원본 요청을 재시도하세요
-            //   - isRefreshing 플래그로 중복 갱신 방지
-            //   - 갱신 중 들어온 요청은 pendingQueue에 쌓아두었다가 완료 후 일괄 처리
-            //   - 갱신 실패 시 store.logOut() 호출
+            if (isRefreshing) {
+                return new Promise(resolve => {
+                    refreshQueue.push((token: string) => {
+                        originalRequest.headers.Authorization = `Bearer ${token}`;
+                        resolve(apiClient(originalRequest));
+                    });
+                });
+            }
 
-            return Promise.reject(error);
+            isRefreshing = true;
+
+            try {
+                const newToken = await store.refreshAccessToken();
+                processQueue(newToken);
+                isRefreshing = false;
+
+                originalRequest.headers.Authorization = `Bearer ${newToken}`;
+                return apiClient(originalRequest);
+            } catch (refreshError) {
+                isRefreshing = false;
+                refreshQueue = [];
+                await store.logOut();
+                return Promise.reject(refreshError);
+            }
         }
 
         console.error('[API] 서버 에러:', status, error.message);
