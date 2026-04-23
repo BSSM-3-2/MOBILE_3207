@@ -38,14 +38,14 @@ export const unstable_settings = {
 const AUTH_ROUTES = new Set(['login', 'signup']);
 
 function AuthGuard() {
-    const { accessToken /* TODO 실습 2: status도 꺼내세요 */ } = useAuthStore();
+    const { accessToken, status } = useAuthStore();
     const segments = useSegments();
     const router = useRouter();
 
     usePushRegistration();
 
     useEffect(() => {
-        // TODO 실습 2: status === 'checking' 이면 return으로 라우팅을 보류하세요
+        if (status === 'checking') return;
 
         const currentRoute = segments[0] as string | undefined;
         const inAuthRoute = AUTH_ROUTES.has(currentRoute ?? '');
@@ -55,7 +55,7 @@ function AuthGuard() {
         } else if (accessToken && inAuthRoute) {
             router.replace('/(tabs)');
         }
-    }, [accessToken, segments]); // TODO 실습 2: 의존성 배열에 status를 추가하세요
+    }, [accessToken, segments, status]);
 
     return null;
 }
