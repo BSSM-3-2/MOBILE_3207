@@ -1,9 +1,7 @@
 import axios from 'axios';
 import Constants from 'expo-constants';
 
-const BASE_URL: string =
-    (Constants.expoConfig?.extra?.apiUrl as string | undefined) ??
-    'https://bssm-api.zer0base.me';
+const BASE_URL: string = Constants.expoConfig?.extra?.apiUrl as string;
 
 const apiClient = axios.create({
     baseURL: BASE_URL,
